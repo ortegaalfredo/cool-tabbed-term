@@ -22,6 +22,13 @@ import QtQuick.Controls 2.3
 
 Menu {
     id: contextmenu
+    IconMenuItem {
+        action: splitVerticallyAction
+    }
+    IconMenuItem {
+        action: splitHorizontallyAction
+    }
+    MenuSeparator {}
     MenuItem {
         action: copyAction
     }
@@ -39,6 +46,12 @@ Menu {
         }
         MenuItem {
             action: newTabAction
+        }
+        MenuItem {
+            action: closeTerminalAction
+        }
+        MenuItem {
+            action: closeTabAction
         }
         MenuSeparator {}
         MenuItem {

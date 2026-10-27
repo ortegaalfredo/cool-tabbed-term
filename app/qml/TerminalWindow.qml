@@ -120,8 +120,43 @@ ApplicationWindow {
     Action {
         id: closeTabAction
         text: qsTr("Close Tab")
-        shortcut: appSettings.isMacOS ? "Meta+W" : "Ctrl+Shift+W"
         onTriggered: terminalTabs.closeTab(terminalTabs.currentIndex)
+    }
+    Action {
+        id: splitVerticallyAction
+        text: qsTr("Split Vertically")
+        icon.source: "images/split-vertical.png"
+        shortcut: appSettings.isMacOS ? "Meta+Shift+E" : "Ctrl+Shift+E"
+        onTriggered: terminalTabs.splitCurrent(Qt.Horizontal)
+    }
+    Action {
+        id: splitHorizontallyAction
+        text: qsTr("Split Horizontally")
+        icon.source: "images/split-horizontal.png"
+        shortcut: appSettings.isMacOS ? "Meta+Shift+O" : "Ctrl+Shift+O"
+        onTriggered: terminalTabs.splitCurrent(Qt.Vertical)
+    }
+    Action {
+        id: closeTerminalAction
+        text: qsTr("Close Terminal")
+        shortcut: appSettings.isMacOS ? "Meta+W" : "Ctrl+Shift+W"
+        onTriggered: terminalTabs.closeCurrentTerminal()
+    }
+    Shortcut {
+        sequence: appSettings.isMacOS ? "Meta+Left" : "Alt+Left"
+        onActivated: terminalTabs.focusNeighbor(Qt.LeftArrow)
+    }
+    Shortcut {
+        sequence: appSettings.isMacOS ? "Meta+Right" : "Alt+Right"
+        onActivated: terminalTabs.focusNeighbor(Qt.RightArrow)
+    }
+    Shortcut {
+        sequence: appSettings.isMacOS ? "Meta+Up" : "Alt+Up"
+        onActivated: terminalTabs.focusNeighbor(Qt.UpArrow)
+    }
+    Shortcut {
+        sequence: appSettings.isMacOS ? "Meta+Down" : "Alt+Down"
+        onActivated: terminalTabs.focusNeighbor(Qt.DownArrow)
     }
     Shortcut {
         sequence: appSettings.isMacOS ? "Meta+1" : "Alt+1"

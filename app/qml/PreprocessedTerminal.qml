@@ -41,6 +41,12 @@ Item{
     property alias title: ksession.title
     property alias kterminal: kterminal
     property bool isActive: false
+    property real normalizedScale: terminalWindow.normalizedWindowScale
+    property string initialWorkingDirectory: ""
+
+    function currentDir() {
+        return ksession.currentDir
+    }
 
     property size terminalSize: kterminal.terminalSize
     property size fontMetrics: kterminal.fontMetrics
@@ -180,7 +186,9 @@ Item{
                 ksession.setArgs(["-i", "-l"]);
             }
 
-            if (workdir)
+            if (terminalContainer.initialWorkingDirectory)
+                ksession.initialWorkingDirectory = terminalContainer.initialWorkingDirectory;
+            else if (workdir)
                 ksession.initialWorkingDirectory = workdir;
 
             ksession.startShellProgram();
@@ -214,7 +222,7 @@ Item{
 
     MouseArea {
         property real margin: appSettings.margin
-        property real frameSize: appSettings.frameSize * terminalWindow.normalizedWindowScale
+        property real frameSize: appSettings.frameSize * terminalContainer.normalizedScale
 
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         anchors.fill: parent
@@ -259,7 +267,7 @@ Item{
             var cc = Qt.size(0.5 - x, 0.5 - y);
             var distortion = (cc.height * cc.height + cc.width * cc.width)
                     * appSettings.screenCurvature * appSettings.screenCurvatureSize
-                    * terminalWindow.normalizedWindowScale;
+                    * terminalContainer.normalizedScale;
 
             return Qt.point((x - cc.width  * (1+distortion) * distortion) * (kterminal.totalWidth),
                            (y - cc.height * (1+distortion) * distortion) * (kterminal.totalHeight))

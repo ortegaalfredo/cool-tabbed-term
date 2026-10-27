@@ -23,6 +23,8 @@ import QtQuick 2.2
 import "utils.js" as Utils
 
 Item {
+    id: shaderTerminal
+
     function dynamicFragmentPath() {
         var rasterMode = appSettings.rasterization;
         var burnInOn = appSettings.burnIn > 0 ? 1 : 0;
@@ -54,8 +56,11 @@ Item {
     property color fontColor: appSettings.fontColor
     property color backgroundColor: appSettings.backgroundColor
 
-    property real screenCurvature: appSettings.screenCurvature * appSettings.screenCurvatureSize * terminalWindow.normalizedWindowScale
-    property real frameSize: appSettings.frameSize * terminalWindow.normalizedWindowScale
+    // Effects are sized relative to this terminal, which can be a pane smaller than the window.
+    property real normalizedScale: 1024 / Math.max(1, 0.5 * width + 0.5 * height)
+
+    property real screenCurvature: appSettings.screenCurvature * appSettings.screenCurvatureSize * normalizedScale
+    property real frameSize: appSettings.frameSize * normalizedScale
 
     property real chromaColor: appSettings.chromaColor
 
@@ -155,6 +160,7 @@ Item {
                 id: terminalFrame
                 blending: false
                 anchors.fill: parent
+                normalizedScale: shaderTerminal.normalizedScale
             }
         }
     }

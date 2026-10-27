@@ -26,6 +26,8 @@ ShaderTerminal {
     property alias title: terminal.title
     property alias terminalSize: terminal.terminalSize
     property bool isActive: false
+    property string initialWorkingDirectory: ""
+    readonly property bool terminalHasFocus: terminal.mainTerminal.activeFocus
     signal sessionFinished()
 
     property bool loadBloomEffect: appSettings.bloom > 0 || appSettings._frameShininess > 0
@@ -37,8 +39,8 @@ ShaderTerminal {
     burnInEffect: terminal.burnInEffect
     virtualResolution: terminal.virtualResolution
     screenResolution: Qt.size(
-        terminalWindow.width * Screen.devicePixelRatio * appSettings.windowScaling,
-        terminalWindow.height * Screen.devicePixelRatio * appSettings.windowScaling
+        width * Screen.devicePixelRatio * appSettings.windowScaling,
+        height * Screen.devicePixelRatio * appSettings.windowScaling
     )
     bloomSource: bloomSourceLoader.item
 
@@ -46,11 +48,17 @@ ShaderTerminal {
         id: terminal
         anchors.fill: parent
         isActive: mainShader.isActive
+        normalizedScale: mainShader.normalizedScale
+        initialWorkingDirectory: mainShader.initialWorkingDirectory
         onSessionFinished: mainShader.sessionFinished()
     }
 
     function activate() {
         terminal.mainTerminal.forceActiveFocus()
+    }
+
+    function currentDir() {
+        return terminal.currentDir()
     }
 
     //  EFFECTS  ////////////////////////////////////////////////////////////////

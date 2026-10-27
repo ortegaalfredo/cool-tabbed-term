@@ -53,6 +53,32 @@ Item {
         tabBar.currentIndex = Math.min(tabBar.currentIndex, tabsModel.count - 1)
     }
 
+    function currentTab() {
+        return tabsRepeater.itemAt(currentIndex)
+    }
+
+    // Qt.Horizontal puts the new terminal to the right, Qt.Vertical below.
+    function splitCurrent(orientation) {
+        var tab = currentTab()
+        if (tab) {
+            tab.split(orientation)
+        }
+    }
+
+    function closeCurrentTerminal() {
+        var tab = currentTab()
+        if (tab) {
+            tab.closeFocusedTerminal()
+        }
+    }
+
+    function focusNeighbor(direction) {
+        var tab = currentTab()
+        if (tab) {
+            tab.focusNeighbor(direction)
+        }
+    }
+
     // Destroy all terminals while the window is still alive. If they are left to be
     // deleted as children of the window, Qt 6.4 crashes in clearFocusInScope.
     function releaseTabs() {
@@ -134,24 +160,19 @@ Item {
             currentIndex: tabBar.currentIndex
 
             Repeater {
+                id: tabsRepeater
                 model: tabsModel
-                TerminalContainer {
-                    property bool shouldHaveFocus: terminalWindow.active && StackLayout.isCurrentItem
-                    isActive: StackLayout.isCurrentItem
-                    onShouldHaveFocusChanged: {
-                        if (shouldHaveFocus) {
-                            activate()
-                        }
-                    }
+                TerminalTab {
+                    isCurrent: StackLayout.isCurrentItem
                     onTitleChanged: tabsModel.setProperty(index, "title", normalizeTitle(title))
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    onSessionFinished: tabsRoot.closeTab(index)
+                    onFinished: tabsRoot.closeTab(index)
                     onTerminalSizeChanged: updateTerminalSize()
+                    onIsCurrentChanged: updateTerminalSize()
 
                     function updateTerminalSize() {
-                        // Every tab will have the same size so we can simply take the first one.
-                        if (index == 0) {
+                        if (isCurrent) {
                             tabsRoot.terminalSize = terminalSize
                         }
                     }

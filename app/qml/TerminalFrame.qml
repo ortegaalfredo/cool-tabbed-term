@@ -33,11 +33,13 @@ ShaderEffect {
         0.125 + 0.750 * ambientLight
     )
 
-    property real screenCurvature: appSettings.screenCurvature * appSettings.screenCurvatureSize * terminalWindow.normalizedWindowScale
+    property real normalizedScale: terminalWindow.normalizedWindowScale
+
+    property real screenCurvature: appSettings.screenCurvature * appSettings.screenCurvatureSize * normalizedScale
 
     property real frameShininess: appSettings.frameShininess
 
-    property real frameSize: appSettings.frameSize * terminalWindow.normalizedWindowScale
+    property real frameSize: appSettings.frameSize * normalizedScale
 
     property real screenRadius: appSettings.screenRadius
 

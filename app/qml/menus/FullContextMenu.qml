@@ -22,6 +22,9 @@ import QtQuick.Controls 2.3
 
 Menu {
     id: contextmenu
+
+    // Profile of the terminal this menu belongs to; choosing a profile changes only that terminal.
+    property QtObject profile
     IconMenuItem {
         action: splitVerticallyAction
     }
@@ -92,7 +95,7 @@ Menu {
             delegate: MenuItem {
                 text: model.text
                 onTriggered: {
-                    appSettings.loadProfileString(obj_string)
+                    contextmenu.profile.loadProfileString(obj_string)
                 }
             }
             onObjectAdded: function(index, object) { profilesMenu.insertItem(index, object) }

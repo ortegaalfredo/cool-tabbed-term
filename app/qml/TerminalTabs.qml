@@ -31,6 +31,11 @@ Item {
     readonly property int count: tabsModel.count
     property size terminalSize: Qt.size(0, 0)
 
+    readonly property Item currentTabItem: tabsRepeater.count > 0 && currentIndex >= 0 ? tabsRepeater.itemAt(currentIndex) : null
+    // Profile of the focused terminal of the current tab.
+    readonly property TerminalProfile activeProfile: currentTabItem && currentTabItem.focusedTerminal
+                                                     ? currentTabItem.focusedTerminal.profile : null
+
     function normalizeTitle(rawTitle) {
         if (rawTitle === undefined || rawTitle === null) {
             return ""
@@ -38,8 +43,12 @@ Item {
         return String(rawTitle).trim()
     }
 
-    function addTab() {
-        tabsModel.append({ title: "" })
+    // New tabs start with the given profile JSON, by default a copy of the focused terminal's.
+    function addTab(profileString) {
+        if (profileString === undefined) {
+            profileString = activeProfile ? activeProfile.composeProfileString() : terminalWindow.initialProfile
+        }
+        tabsModel.append({ title: "", profile: profileString })
         tabBar.currentIndex = tabsModel.count - 1
     }
 
@@ -54,7 +63,7 @@ Item {
     }
 
     function currentTab() {
-        return tabsRepeater.itemAt(currentIndex)
+        return currentTabItem
     }
 
     // Qt.Horizontal puts the new terminal to the right, Qt.Vertical below.
@@ -89,7 +98,7 @@ Item {
         id: tabsModel
     }
 
-    Component.onCompleted: addTab()
+    Component.onCompleted: addTab(terminalWindow.initialProfile)
 
     ColumnLayout {
         anchors.fill: parent
@@ -164,6 +173,7 @@ Item {
                 model: tabsModel
                 TerminalTab {
                     isCurrent: StackLayout.isCurrentItem
+                    initialProfile: model.profile
                     onTitleChanged: tabsModel.setProperty(index, "title", normalizeTitle(title))
                     Layout.fillWidth: true
                     Layout.fillHeight: true

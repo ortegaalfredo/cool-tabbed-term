@@ -40,6 +40,17 @@ ApplicationWindow {
     visible: false
 
     property bool fullscreen: false
+
+    // Profile JSON the first terminal starts with.
+    property string initialProfile: ""
+    // Profile of the focused terminal; the settings window and the Profiles menu edit it.
+    readonly property TerminalProfile activeProfile: terminalTabs.activeProfile
+
+    onActiveChanged: {
+        if (active) {
+            appRoot.activeWindow = terminalWindow
+        }
+    }
     onFullscreenChanged: visibility = (fullscreen ? Window.FullScreen : Window.Windowed)
 
     menuBar: WindowMenu { }
@@ -63,7 +74,7 @@ ApplicationWindow {
         id: newWindowAction
         text: qsTr("New Window")
         shortcut: appSettings.isMacOS ? "Meta+N" : "Ctrl+Shift+N"
-        onTriggered: appRoot.createWindow()
+        onTriggered: appRoot.createWindowWithProfile(activeProfile ? activeProfile.composeProfileString() : initialProfile)
     }
     Action {
         id: quitAction
@@ -217,6 +228,10 @@ ApplicationWindow {
         }
     }
     onClosing: {
+        // Remember the look of the last closed window for the next start.
+        if (activeProfile) {
+            appSettings.defaultProfile.loadProfileString(activeProfile.composeProfileString())
+        }
         terminalTabs.releaseTabs()
         appRoot.closeWindow(terminalWindow)
     }

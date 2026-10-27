@@ -26,6 +26,8 @@ Item {
     id: tab
 
     property bool isCurrent: false
+    // Profile JSON of the first terminal; splits copy the profile of the terminal they split.
+    property string initialProfile: ""
     property Item rootNode: null
     property Item focusedTerminal: null
 
@@ -75,7 +77,7 @@ Item {
     }
 
     Component.onCompleted: {
-        var terminal = terminalComponent.createObject(tab)
+        var terminal = terminalComponent.createObject(tab, { initialProfile: initialProfile })
         setRoot(terminal)
         focusedTerminal = terminal
     }
@@ -107,7 +109,10 @@ Item {
         if (!target)
             return
 
-        var terminal = terminalComponent.createObject(tab, { initialWorkingDirectory: target.currentDir() })
+        var terminal = terminalComponent.createObject(tab, {
+            initialWorkingDirectory: target.currentDir(),
+            initialProfile: target.profile.composeProfileString()
+        })
         var node = splitComponent.createObject(tab, { orientation: orientation })
         replaceNode(target, node)
         node.first = target

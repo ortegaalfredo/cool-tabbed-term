@@ -63,7 +63,9 @@ MenuBar {
             delegate: MenuItem {
                 text: model.text
                 onTriggered: {
-                    appSettings.loadProfileString(obj_string)
+                    if (terminalWindow.activeProfile) {
+                        terminalWindow.activeProfile.loadProfileString(obj_string)
+                    }
                 }
             }
             onObjectAdded: function(index, object) { profilesMenu.insertItem(index, object) }

@@ -31,6 +31,14 @@ Item {
     readonly property int count: tabsModel.count
     property size terminalSize: Qt.size(0, 0)
 
+    // Tilix-like strip with a live preview of every tab.
+    property bool quickViewOpen: false
+    onCountChanged: {
+        if (count <= 1) {
+            closeQuickView()
+        }
+    }
+
     readonly property Item currentTabItem: tabsRepeater.count > 0 && currentIndex >= 0 ? tabsRepeater.itemAt(currentIndex) : null
     // Profile of the focused terminal of the current tab.
     readonly property TerminalProfile activeProfile: currentTabItem && currentTabItem.focusedTerminal
@@ -60,6 +68,20 @@ Item {
 
         tabsModel.remove(index)
         tabBar.currentIndex = Math.min(tabBar.currentIndex, tabsModel.count - 1)
+    }
+
+    function openQuickView() {
+        quickViewOpen = true
+    }
+
+    function closeQuickView() {
+        if (!quickViewOpen)
+            return
+
+        quickViewOpen = false
+        if (currentTabItem) {
+            currentTabItem.activateFocusedTerminal()
+        }
     }
 
     function currentTab() {
@@ -116,6 +138,27 @@ Item {
                 anchors.fill: parent
                 spacing: 0
 
+                ToolButton {
+                    id: quickViewButton
+                    // "(current/total) arrow": toggles the tab quick view.
+                    text: "(" + (tabsRoot.currentIndex + 1) + "/" + tabsModel.count + ") "
+                          + (tabsRoot.quickViewOpen ? "\u2191" : "\u2193")
+                    checked: tabsRoot.quickViewOpen
+                    focusPolicy: Qt.NoFocus
+                    Layout.fillHeight: true
+                    padding: innerPadding
+                    onClicked: tabsRoot.quickViewOpen ? tabsRoot.closeQuickView() : tabsRoot.openQuickView()
+                }
+
+                ToolButton {
+                    id: addTabButton
+                    text: "+"
+                    focusPolicy: Qt.NoFocus
+                    Layout.fillHeight: true
+                    padding: innerPadding
+                    onClicked: tabsRoot.addTab()
+                }
+
                 TabBar {
                     id: tabBar
                     Layout.fillWidth: true
@@ -149,34 +192,27 @@ Item {
                         }
                     }
                 }
-
-                ToolButton {
-                    id: addTabButton
-                    text: "+"
-                    focusPolicy: Qt.NoFocus
-                    Layout.fillHeight: true
-                    padding: innerPadding
-                    Layout.alignment: Qt.AlignVCenter
-                    onClicked: tabsRoot.addTab()
-                }
             }
         }
 
-        StackLayout {
+        // Only the current tab is shown. While the quick view is open the other tabs are made
+        // visible too, so it can render their previews; it hides them from the scene itself.
+        Item {
             id: stack
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: tabBar.currentIndex
 
             Repeater {
                 id: tabsRepeater
                 model: tabsModel
                 TerminalTab {
-                    isCurrent: StackLayout.isCurrentItem
+                    isCurrent: index === tabsRoot.currentIndex
                     initialProfile: model.profile
                     onTitleChanged: tabsModel.setProperty(index, "title", normalizeTitle(title))
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    anchors.fill: parent
+                    visible: isCurrent || tabsRoot.quickViewOpen
+                    enabled: isCurrent
+                    z: isCurrent ? 1 : 0
                     onFinished: tabsRoot.closeTab(index)
                     onTerminalSizeChanged: updateTerminalSize()
                     onIsCurrentChanged: updateTerminalSize()
@@ -186,6 +222,22 @@ Item {
                             tabsRoot.terminalSize = terminalSize
                         }
                     }
+                }
+            }
+
+            Loader {
+                anchors.fill: parent
+                z: 2
+                active: tabsRoot.quickViewOpen
+                sourceComponent: TabQuickView {
+                    model: tabsModel
+                    tabs: tabsRepeater
+                    currentIndex: tabsRoot.currentIndex
+                    onTabSelected: function(index) {
+                        tabsRoot.currentIndex = index
+                        tabsRoot.closeQuickView()
+                    }
+                    onCloseRequested: tabsRoot.closeQuickView()
                 }
             }
         }

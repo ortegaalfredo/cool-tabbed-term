@@ -25,6 +25,7 @@
         <file>TerminalTab.qml</file>
         <file>TerminalSplit.qml</file>
         <file>TerminalProfile.qml</file>
+        <file>TabQuickView.qml</file>
         <file>images/crt256.png</file>
         <file>utils.js</file>
         <file>images/allNoise512.png</file>

@@ -66,7 +66,8 @@ Item {
         width: horizontal ? handleSize : split.width
         height: horizontal ? split.height : handleSize
         z: 1
-        color: handleArea.pressed || handleArea.containsMouse ? palette.highlight : palette.window
+        // Black like the gap between two monitors; slightly lighter while hovered or dragged.
+        color: handleArea.pressed || handleArea.containsMouse ? "#404040" : "black"
 
         MouseArea {
             id: handleArea
